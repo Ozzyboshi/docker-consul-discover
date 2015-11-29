@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import etcd
+import consul
 from jinja2 import Environment, PackageLoader
 import os
 from subprocess import call
@@ -13,42 +13,47 @@ POLL_TIMEOUT=5
 
 signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
-def get_etcd_addr():
-    if "ETCD_HOST" not in os.environ:
-        print "ETCD_HOST not set"
+def get_consul_addr():
+    if "CONSUL_HOST" not in os.environ:
+        print "CONSUL_HOST not set"
         sys.exit(1)
 
-    etcd_host = os.environ["ETCD_HOST"]
-    if not etcd_host:
-        print "ETCD_HOST not set"
+    consul_host = os.environ["CONSUL_HOST"]
+    if not consul_host:
+        print "CONSUL_HOST not set"
         sys.exit(1)
 
-    port = 4001
-    host = etcd_host
+    port = 8500
+    host = consul_host
 
-    if ":" in etcd_host:
-        host, port = etcd_host.split(":")
+    if ":" in consul_host:
+        host, port = consul_host.split(":")
 
     return host, port
 
 def get_services():
 
-    host, port = get_etcd_addr()
-    client = etcd.Client(host=host, port=int(port))
-    backends = client.read('/backends', recursive = True)
+    host, port = get_consul_addr()
+    client = consul.Consul(host=host, port=int(port))
+    index, data = client.kv.get('backends/', recurse = True)
     services = {}
+    
+    for i in data:
 
-    for i in backends.children:
-
-        if i.key[1:].count("/") != 2:
+        if i['Key'].count("/") != 2:
             continue
-
-        ignore, service, container = i.key[1:].split("/")
+        
+        ignore, service, container = i['Key'].split("/")
+        
         endpoints = services.setdefault(service, dict(port="", backends=[]))
         if container == "port":
-            endpoints["port"] = i.value
+            index, portObj = client.kv.get('backends/'+service+'/'+container)
+            port=portObj['Value']
+            endpoints["port"] = port
             continue
-        endpoints["backends"].append(dict(name=container, addr=i.value))
+        index, ip = client.kv.get('backends/'+service+'/'+container)
+        addr=ip['Value']
+        endpoints["backends"].append(dict(name=container, addr=addr))
     return services
 
 def generate_config(services):

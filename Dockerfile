@@ -10,7 +10,7 @@ RUN tar -zxvf haproxy-1.5.1.tar.gz
 
 RUN cd haproxy-1.5.1 && make TARGET=generic && make install
 
-RUN pip install python-etcd Jinja2
+RUN pip install python-consul Jinja2
 RUN touch /var/run/haproxy.pid
 
 ADD . /app
