@@ -1,11 +1,9 @@
-docker-discover is a service discovery container that leverages haproxy and etcd.  When running,
-it sets up listeners for remote docker containers discovered via etcd.  It works in tandem with
-docker-register.
+docker-consul-discover is a service discovery container that leverages haproxy and consul.  When running,
+it sets up listeners for remote docker containers discovered via consul.  It works in tandem with
+docker-consul-register.
 
 Together, they implement [service discovery][2] for docker containers with a similar architecture
 to [SmartStack][3].  docker-discovery is analagous to [synapse][4] in the SmartStack system.
-
-See also [Docker Service Discovery Using Etcd and Haproxy][5]
 
 ### How it works
 
@@ -18,14 +16,14 @@ can be started and stopped as needed w/ minimal client impact.
 The intent is that you would run this container on any host that has containers that need to call
 remote services in your infrastructure.
 
-From within a container on a host running docker-discover, they can reach remote containers by hitting
+From within a container on a host running docker-consul-discover, they can reach remote containers by hitting
 the docker bridge IP or the host IP and the corresponding `EXPOSE`ed port of the service.
 
 ### Usage
 
 To run it:
 
-    $ docker run -d --net host --name docker-discover -e ETCD_HOST=1.2.3.4:4001 -p 127.0.0.1:1936:1936 -t jwilder/docker-discover
+    $ docker run -d --net host --name docker-discover -e ETCD_HOST=1.2.3.4:4001 -p 127.0.0.1:1936:1936 -t ozzyboshi/docker-consul-discover
 
 Then start any containers that need to access remote containers.  You'll likely want to pass the host's
  IP or the docker bridge IP as an env variable to make it easy for call proxied services.
@@ -58,4 +56,3 @@ currently supported.
 * Support http, udp proxying
 * Support multiple ports
 * Make ETCD prefix configurable
-* Support other backends (consul, zookeeper, redis, etc.)
