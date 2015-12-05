@@ -55,4 +55,4 @@ currently supported.
 
 * Support http, udp proxying
 * Support multiple ports
-* Make ETCD prefix configurable
+* Make Consul prefix configurable
