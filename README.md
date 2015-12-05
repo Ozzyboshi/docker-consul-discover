@@ -23,7 +23,7 @@ the docker bridge IP or the host IP and the corresponding `EXPOSE`ed port of the
 
 To run it:
 
-    $ docker run -d --net host --name docker-discover -e ETCD_HOST=1.2.3.4:4001 -p 127.0.0.1:1936:1936 -t ozzyboshi/docker-consul-discover
+    $ docker run -d --net host --name docker-discover -e CONSUL_HOST=1.2.3.4:8500 -p 127.0.0.1:1936:1936 -t ozzyboshi/docker-consul-discover
 
 Then start any containers that need to access remote containers.  You'll likely want to pass the host's
  IP or the docker bridge IP as an env variable to make it easy for call proxied services.
