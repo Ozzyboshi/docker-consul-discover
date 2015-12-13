@@ -46,14 +46,14 @@ def get_services():
         ignore, service, container = i['Key'].split("/")
         
         endpoints = services.setdefault(service, dict(port="", backends=[]))
-        if container == "port":
-            index, portObj = client.kv.get('backends/'+service+'/'+container)
-            port=portObj['Value']
-            endpoints["port"] = port
-            continue
+
         index, ip = client.kv.get('backends/'+service+'/'+container)
         addr=ip['Value']
         endpoints["backends"].append(dict(name=container, addr=addr))
+        port='80'
+        if os.environ["HOST_SERVE_PORT"]:
+            port=os.environ["HOST_SERVE_PORT"]
+        endpoints["port"] = port
     return services
 
 def generate_config(services):
