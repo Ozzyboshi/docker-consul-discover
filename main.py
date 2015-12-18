@@ -51,7 +51,7 @@ def get_services():
         addr=ip['Value']
         endpoints["backends"].append(dict(name=container, addr=addr))
         port='80'
-        if os.environ["HOST_SERVE_PORT"]:
+        if "HOST_SERVE_PORT" in os.environ:
             port=os.environ["HOST_SERVE_PORT"]
         endpoints["port"] = port
     return services
