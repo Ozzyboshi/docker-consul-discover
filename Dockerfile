@@ -19,5 +19,5 @@ WORKDIR /app
 
 EXPOSE 1936
 
-CMD ["python", "main.py"]
+CMD ["python", "main.py", "haproxy_web.cfg.tmpl"]
 
