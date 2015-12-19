@@ -1,0 +1,36 @@
+global
+    maxconn 4096
+    pidfile /var/run/haproxy.pid
+    daemon
+
+defaults
+    log global
+    mode http
+    option dontlognull
+    retries 3
+    option redispatch
+    maxconn 2000
+    timeout connect 5s
+    timeout client 1m
+    timeout server 1m
+
+frontend http-in
+        bind *:80
+
+        # Define hosts based on domain names
+        {% for service in services %}
+        acl {{ service }} hdr(host) -i {{ service }}{% endfor %}
+
+        ## figure out backend to use based on domainname
+        {% for service in services %}
+        use_backend {{ service }} if {{ service }}{% endfor %}
+
+{% for service in services %}
+backend {{ service }}
+    balance roundrobin
+    option httpclose
+    option forwardfor
+    {% for backend in services[service].backends %}
+    server {{ backend.name }} {{ backend.addr }}{% endfor %}
+{% endfor %}
+
